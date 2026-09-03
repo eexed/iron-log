@@ -32,7 +32,6 @@ export function WorkoutLogger() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'today' | 'calendar'>('today');
 
-  // 캘린더 상태
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -41,15 +40,13 @@ export function WorkoutLogger() {
   const loggedExerciseIds = todaySession?.exercises.map((e) => e.exerciseId) ?? [];
   const isDeloadToday = todaySession?.isDeloadSession ?? periodization.isDeloadWeek;
 
-  // 운동 삭제 함수
   function handleRemoveExercise(exerciseLogId: string) {
     if (!todaySession) return;
-    if (!confirm('해당 운동 종목과 기록된 세트를 모두 삭제할까요?')) return;
+    if (!confirm('해당 운동 종목을 삭제할까요?')) return;
     const updatedExercises = todaySession.exercises.filter((ex) => ex.id !== exerciseLogId);
-    storage.saveSession({
-      ...todaySession,
-      exercises: updatedExercises,
-    });
+    const updatedSession = { ...todaySession, exercises: updatedExercises };
+    const updatedAll = sessions.map((s) => (s.id === todaySession.id ? updatedSession : s));
+    storage.saveSessions(updatedAll);
     window.location.reload();
   }
 
@@ -76,7 +73,6 @@ export function WorkoutLogger() {
     reader.readAsText(file);
   }
 
-  // 캘린더 렌더링 도우미
   const year = calendarMonth.getFullYear();
   const month = calendarMonth.getMonth();
   const firstDayIndex = new Date(year, month, 1).getDay();
@@ -89,7 +85,6 @@ export function WorkoutLogger() {
 
   return (
     <div className="min-h-screen pb-28 text-ink-light bg-[#121212] text-white">
-      {/* 상단 헤더 */}
       <header className="sticky top-0 z-20 bg-[#1e1e1e]/90 backdrop-blur border-b border-gray-800 px-4 pt-[env(safe-area-inset-top)]">
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-3">
@@ -107,7 +102,6 @@ export function WorkoutLogger() {
         </div>
       </header>
 
-      {/* 사이드 드로어 메뉴 */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div
@@ -154,7 +148,6 @@ export function WorkoutLogger() {
               </nav>
             </div>
 
-            {/* 백업 / 복구 하단 메뉴 */}
             <div className="border-t border-gray-800 pt-4 flex flex-col gap-2">
               <p className="text-xs text-gray-500 font-semibold mb-1">데이터 관리</p>
               <label className="flex items-center gap-2 text-xs text-gray-300 p-2 rounded hover:bg-gray-800 cursor-pointer">
@@ -183,7 +176,6 @@ export function WorkoutLogger() {
         </div>
       )}
 
-      {/* 메인 화면 영역 */}
       {currentView === 'today' ? (
         <main className="px-4 pt-4 flex flex-col gap-4 max-w-xl mx-auto">
           <DeloadBanner
@@ -251,10 +243,8 @@ export function WorkoutLogger() {
           )}
         </main>
       ) : (
-        /* 캘린더 뷰 */
         <main className="px-4 pt-4 flex flex-col gap-4 max-w-xl mx-auto">
           <div className="bg-[#1e1e1e] p-4 rounded-xl border border-gray-800">
-            {/* 년월 선택 */}
             <div className="flex items-center justify-between mb-4">
               <span className="font-bold text-base">
                 {year}년 {month + 1}월
@@ -275,12 +265,10 @@ export function WorkoutLogger() {
               </div>
             </div>
 
-            {/* 요일 헤더 */}
             <div className="grid grid-cols-7 text-center text-xs text-gray-500 mb-2">
               <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
             </div>
 
-            {/* 날짜 그리드 */}
             <div className="grid grid-cols-7 gap-1">
               {Array.from({ length: firstDayIndex }).map((_, i) => (
                 <div key={`empty-${i}`} className="h-10" />
@@ -309,7 +297,6 @@ export function WorkoutLogger() {
             </div>
           </div>
 
-          {/* 선택한 날짜의 운동 상세 내역 */}
           <div className="bg-[#1e1e1e] p-4 rounded-xl border border-gray-800">
             <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <CalendarIcon size={16} className="text-emerald-400" />
@@ -327,7 +314,7 @@ export function WorkoutLogger() {
                           key={set.id}
                           className="text-[11px] bg-gray-800 text-gray-300 px-2 py-0.5 rounded"
                         >
-                          {idx + 1}세트: {set.weight}kg × {set.reps}회
+                          {idx + 1}세트: {set.weightKg ?? 0}kg × {set.reps ?? 0}회
                         </span>
                       ))}
                     </div>

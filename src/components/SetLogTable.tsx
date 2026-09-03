@@ -1,10 +1,10 @@
 import { Plus, Trash2 } from 'lucide-react';
-import type { ExerciseLog, ExerciseSet, LastPerformance } from '../types';
+import type { ExerciseLog, SetLog, LastPerformance } from '../types';
 
 interface Props {
   exerciseLog: ExerciseLog;
   lastPerformance?: LastPerformance | null;
-  onUpdateSet: (setId: string, patch: Partial<ExerciseSet>) => void;
+  onUpdateSet: (setId: string, patch: Partial<SetLog>) => void;
   onAddSet: () => void;
   onRemoveSet: (setId: string) => void;
   onSetCompleted: (restSeconds: number) => void;
@@ -21,7 +21,7 @@ export function SetLogTable({
     <div className="flex flex-col gap-2">
       {lastPerformance && (
         <p className="text-[11px] text-gray-400">
-          지난 기록: 최고 {lastPerformance.bestWeight}kg × {lastPerformance.bestReps}회
+          지난 기록: 최고 {(lastPerformance as any).bestWeightKg ?? (lastPerformance as any).weightKg ?? (lastPerformance as any).weight ?? 0}kg × {(lastPerformance as any).bestReps ?? (lastPerformance as any).reps ?? 0}회
         </p>
       )}
 
@@ -44,15 +44,15 @@ export function SetLogTable({
             <input
               type="number"
               inputMode="decimal"
-              value={set.weight || ''}
+              value={set.weightKg ?? ''}
               placeholder="0"
-              onChange={(e) => onUpdateSet(set.id, { weight: Number(e.target.value) })}
+              onChange={(e) => onUpdateSet(set.id, { weightKg: Number(e.target.value) })}
               className="w-full bg-[#1a1a1a] text-center text-sm py-1.5 rounded text-white outline-none focus:ring-1 focus:ring-emerald-400"
             />
             <input
               type="number"
               inputMode="numeric"
-              value={set.reps || ''}
+              value={set.reps ?? ''}
               placeholder="0"
               onChange={(e) => onUpdateSet(set.id, { reps: Number(e.target.value) })}
               className="w-full bg-[#1a1a1a] text-center text-sm py-1.5 rounded text-white outline-none focus:ring-1 focus:ring-emerald-400"
